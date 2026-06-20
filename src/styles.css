@@ -46,6 +46,13 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-navy: var(--navy);
+  --color-rule: var(--rule);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -149,5 +156,47 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
   }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+@utility editorial-rule {
+  height: 1px;
+  width: 100%;
+  background: var(--color-rule);
+}
+
+@utility drop-cap {
+  &::first-letter {
+    font-family: var(--font-serif);
+    float: left;
+    font-size: 5.25rem;
+    line-height: 0.9;
+    padding: 0.35rem 0.6rem 0 0;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+}
+
+@utility story-link {
+  background-image: linear-gradient(var(--color-foreground), var(--color-foreground));
+  background-size: 0 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 300ms ease;
+}
+@utility story-link-hover {
+  &:hover { background-size: 100% 1px; }
 }
