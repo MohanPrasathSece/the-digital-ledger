@@ -200,3 +200,8 @@
 @utility story-link-hover {
   &:hover { background-size: 100% 1px; }
 }
+
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
