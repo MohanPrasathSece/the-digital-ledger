@@ -222,3 +222,17 @@
     color: var(--color-primary);
   }
 }
+
+@utility input {
+  width: 100%;
+  border: 1px solid var(--color-rule);
+  background: transparent;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-foreground);
+  transition: border-color 150ms ease;
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+}
