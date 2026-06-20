@@ -205,3 +205,34 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-rule);
+  padding: 0.35rem 0.7rem;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-foreground);
+  transition: all 150ms ease;
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+@utility input {
+  width: 100%;
+  border: 1px solid var(--color-rule);
+  background: transparent;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-foreground);
+  transition: border-color 150ms ease;
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+}
