@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Send, Check, Shield, Activity, Lock, Zap, ArrowUpRight, ArrowDownRight, BarChart3, Terminal } from "lucide-react";
 
@@ -39,7 +39,7 @@ function CryptoEnquiryPage() {
   
   // Trading window state
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [tradeId, setTradeId] = useState(0);
+  const tradeIdRef = useRef(6);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -52,18 +52,17 @@ function CryptoEnquiryPage() {
     // Initialize with some trades
     const initialTrades = Array.from({length: 6}, (_, i) => generateFakeTrade(i));
     setTrades(initialTrades);
-    setTradeId(6);
 
     const interval = setInterval(() => {
       setTrades(prev => {
-        const newTrades = [generateFakeTrade(tradeId), ...prev];
+        const newTrades = [generateFakeTrade(tradeIdRef.current), ...prev];
+        tradeIdRef.current += 1;
         return newTrades.slice(0, 6); // Keep last 6
       });
-      setTradeId(prev => prev + 1);
     }, 800); // New trade every 800ms
 
     return () => clearInterval(interval);
-  }, [tradeId]);
+  }, []);
 
   const update = <K extends keyof EnquiryValues>(k: K, v: EnquiryValues[K]) => {
     setValues(p => ({ ...p, [k]: v }));
