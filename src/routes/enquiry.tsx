@@ -7,59 +7,15 @@ export const Route = createFileRoute("/enquiry")({
 });
 
 const enquirySchema = z.object({
-  name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().email("Valid email required").max(255),
-  phone: z.string().trim().min(5, "Valid phone required").max(20),
+  name: z.string().trim().min(1, "Nom requis").max(100),
+  email: z.string().trim().email("Email valide requis").max(255),
+  phone: z.string().trim().min(5, "Numéro valide requis").max(20),
   message: z.string().trim().max(2000).optional(),
 });
 type EnquiryValues = z.infer<typeof enquirySchema>;
 type EnquiryErrors = Partial<Record<keyof EnquiryValues, string>>;
 
-const submitCrmEnquiry = createServerFn({ method: "POST" })
-  .validator((data: EnquiryValues) => data)
-  .handler(async ({ data }) => {
-    const CRM_API_URL = process.env.CRM_API_URL;
-    const CRM_AUTH_TOKEN = process.env.CRM_AUTH_TOKEN;
 
-    if (!CRM_API_URL || !CRM_AUTH_TOKEN) {
-      throw new Error("Server misconfiguration: Missing CRM credentials");
-    }
-
-    // Attempting to split name into first and last name if possible
-    const nameParts = data.name.trim().split(" ");
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
-
-    const payload = {
-      country_name: "cy", // Default or extract if needed
-      description: data.message || "",
-      phone: data.phone,
-      email: data.email,
-      first_name: firstName,
-      last_name: lastName,
-      custom_fields: {
-        Source_ID: "Website",
-        Outline_Your_Case: data.message || "Enquiry"
-      }
-    };
-
-    const response = await fetch(CRM_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${CRM_AUTH_TOKEN}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error("CRM submission failed:", response.status, text);
-      throw new Error("Failed to submit enquiry to CRM");
-    }
-
-    return { success: true };
-  });
 
 // --- Fake Trading Data Generator ---
 type Trade = { id: number; time: string; pair: string; type: "BUY" | "SELL"; price: string; amount: string };
@@ -133,11 +89,47 @@ function CryptoEnquiryPage() {
     setIsSubmitting(true);
 
     try {
-      await submitCrmEnquiry({ data: values });
+      const CRM_API_URL = import.meta.env.VITE_CRM_API_URL;
+      const CRM_AUTH_TOKEN = import.meta.env.VITE_CRM_AUTH_TOKEN;
+
+      if (!CRM_API_URL || !CRM_AUTH_TOKEN) {
+        throw new Error("Erreur de configuration : Identifiants CRM manquants");
+      }
+
+      const nameParts = values.name.trim().split(" ");
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+      const payload = {
+        country_name: "cy",
+        description: values.message || "",
+        phone: values.phone,
+        email: values.email,
+        first_name: firstName,
+        last_name: lastName,
+        custom_fields: {
+          Source_ID: "Website",
+          Outline_Your_Case: values.message || "Enquiry"
+        }
+      };
+
+      const response = await fetch(CRM_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${CRM_AUTH_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit enquiry to CRM");
+      }
+
       setSubmitted(true);
       setValues({ name: "", email: "", phone: "", message: "" });
     } catch (err: any) {
-      setSubmitError(err.message || "Something went wrong. Please try again.");
+      setSubmitError(err.message || "Un problème est survenu. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
     }
@@ -151,9 +143,9 @@ function CryptoEnquiryPage() {
         {/* Grid Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-        {/* Glowing Orbs */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600 opacity-20 blur-[120px] animate-pulse duration-[8000ms]"></div>
-        <div className="absolute top-[30%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-600 opacity-15 blur-[100px] animate-pulse duration-[10000ms] delay-1000"></div>
+        {/* Glowing Orbs - Simplified for performance */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/10"></div>
+        <div className="absolute top-[30%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-900/10"></div>
       </div>
 
       {/* Sticky Header */}
@@ -169,7 +161,7 @@ function CryptoEnquiryPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              SYSTEM ONLINE
+              SYSTÈME EN LIGNE
             </div>
           </div>
         </div>
@@ -179,13 +171,13 @@ function CryptoEnquiryPage() {
       <section className="relative z-10 flex flex-col items-center justify-center pt-32 pb-16 px-6 text-center">
         <div className="max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1] font-sans">
-            Outperform The Market <br />
+            Surpassez Le Marché <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-fuchsia-500 to-rose-400">
-              With Machine Precision
+              Avec Une Précision Mécanique
             </span>
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Stop relying on emotion. Start trading with the exact institutional-grade algorithms used by multi-million dollar portfolios.
+            Arrêtez de vous fier aux émotions. Commencez à trader avec les mêmes algorithmes institutionnels utilisés par des portefeuilles de plusieurs millions de dollars.
           </p>
         </div>
       </section>
@@ -211,12 +203,12 @@ function CryptoEnquiryPage() {
               <table className="w-full text-left min-w-[600px]">
                 <thead className="text-zinc-500 border-b border-white/5">
                   <tr>
-                    <th className="pb-3 font-normal">TIMESTAMP</th>
-                    <th className="pb-3 font-normal">PAIR</th>
-                    <th className="pb-3 font-normal">SIDE</th>
-                    <th className="pb-3 font-normal">PRICE</th>
-                    <th className="pb-3 font-normal">AMOUNT</th>
-                    <th className="pb-3 font-normal text-right">STATUS</th>
+                    <th className="pb-3 font-normal">HORODATAGE</th>
+                    <th className="pb-3 font-normal">PAIRE</th>
+                    <th className="pb-3 font-normal">SENS</th>
+                    <th className="pb-3 font-normal">PRIX</th>
+                    <th className="pb-3 font-normal">MONTANT</th>
+                    <th className="pb-3 font-normal text-right">STATUT</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.02]">
@@ -231,7 +223,7 @@ function CryptoEnquiryPage() {
                       <td className="py-3 text-white">{trade.price}</td>
                       <td className="py-3 text-zinc-300">{trade.amount}</td>
                       <td className="py-3 text-right">
-                        <span className="inline-block px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-[10px] tracking-widest">FILLED</span>
+                        <span className="inline-block px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-[10px] tracking-widest">EXÉCUTÉ</span>
                       </td>
                     </tr>
                   ))}
@@ -247,10 +239,10 @@ function CryptoEnquiryPage() {
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {[
-              { label: "Win Rate", value: "84.2%", icon: BarChart3, color: "text-indigo-400" },
-              { label: "Execution Latency", value: "0.2ms", icon: Zap, color: "text-amber-400" },
-              { label: "24h Volume Executed", value: "$12.4M", icon: Activity, color: "text-emerald-400" },
-              { label: "Active Algorithms", value: "14", icon: Cpu, color: "text-fuchsia-400" },
+              { label: "Taux de Réussite", value: "84.2%", icon: BarChart3, color: "text-indigo-400" },
+              { label: "Latence d'Exécution", value: "0.2ms", icon: Zap, color: "text-amber-400" },
+              { label: "Volume Exécuté (24h)", value: "12.4M $", icon: Activity, color: "text-emerald-400" },
+              { label: "Algorithmes Actifs", value: "14", icon: Cpu, color: "text-fuchsia-400" },
             ].map((stat, i) => (
               <div key={i} className="bg-white/[0.03] border border-white/5 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:bg-white/[0.05] transition-colors">
                 <stat.icon className={`w-6 h-6 mb-3 ${stat.color}`} />
@@ -272,8 +264,8 @@ function CryptoEnquiryPage() {
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-rose-400"></div>
 
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-white mb-3">Request Private Access</h2>
-              <p className="text-indigo-200 text-sm">Leave your details to secure your place in the next onboarding cohort. Spaces are strictly limited.</p>
+              <h2 className="text-3xl font-bold text-white mb-3">Demander un Accès Privé</h2>
+              <p className="text-indigo-200 text-sm">Laissez vos coordonnées pour garantir votre place dans la prochaine cohorte d'intégration. Les places sont strictement limitées.</p>
             </div>
 
             {submitted ? (
@@ -281,8 +273,8 @@ function CryptoEnquiryPage() {
                 <div className="mx-auto w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.5)]">
                   <Check className="w-10 h-10 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Application Received</h3>
-                <p className="text-indigo-200">Our advisory team is reviewing your profile and will contact you shortly.</p>
+                <h3 className="text-2xl font-bold text-white mb-2">Candidature Reçue</h3>
+                <p className="text-indigo-200">Notre équipe de conseillers examine votre profil et vous contactera sous peu.</p>
               </div>
             ) : (
               <form onSubmit={onSubmit} noValidate className="space-y-6 text-left">
@@ -292,26 +284,26 @@ function CryptoEnquiryPage() {
                   </div>
                 )}
                 <div className="grid md:grid-cols-2 gap-6">
-                  <Field label="Full Name" error={errors.name}>
+                  <Field label="Nom Complet" error={errors.name}>
                     <input
                       value={values.name}
                       onChange={e => update("name", e.target.value)}
                       className="w-full bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-4 text-white placeholder:text-indigo-300/50 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 transition-all outline-none"
-                      placeholder="e.g. John Doe"
+                      placeholder="ex. Jean Dupont"
                     />
                   </Field>
-                  <Field label="Email Address" error={errors.email}>
+                  <Field label="Adresse Email" error={errors.email}>
                     <input
                       type="email"
                       value={values.email}
                       onChange={e => update("email", e.target.value)}
                       className="w-full bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-4 text-white placeholder:text-indigo-300/50 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 transition-all outline-none"
-                      placeholder="john@example.com"
+                      placeholder="jean@exemple.com"
                     />
                   </Field>
                 </div>
 
-                <Field label="Phone Number" error={errors.phone}>
+                <Field label="Numéro de Téléphone" error={errors.phone}>
                   <input
                     type="tel"
                     value={values.phone}
@@ -321,13 +313,13 @@ function CryptoEnquiryPage() {
                   />
                 </Field>
 
-                <Field label="Investment Goals (Optional)" error={errors.message}>
+                <Field label="Objectifs d'Investissement (Optionnel)" error={errors.message}>
                   <textarea
                     value={values.message}
                     onChange={e => update("message", e.target.value)}
                     rows={3}
                     className="w-full bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-4 text-white placeholder:text-indigo-300/50 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 transition-all outline-none resize-y"
-                    placeholder="Briefly describe your targets..."
+                    placeholder="Décrivez brièvement vos objectifs..."
                   />
                 </Field>
 
@@ -340,15 +332,15 @@ function CryptoEnquiryPage() {
                     <div className="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                     <span className="relative flex items-center justify-center gap-2 font-bold text-[15px] tracking-widest text-white uppercase">
                       {isSubmitting ? (
-                        <>Processing <Activity className="w-5 h-5 ml-1 animate-pulse" /></>
+                        <>Traitement <Activity className="w-5 h-5 ml-1 animate-pulse" /></>
                       ) : (
-                        <>Submit Secure Application <Send className="w-5 h-5 ml-1" /></>
+                        <>Soumettre la Candidature Sécurisée <Send className="w-5 h-5 ml-1" /></>
                       )}
                     </span>
                   </button>
                   <div className="mt-5 flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider text-indigo-300/70">
                     <Shield className="w-4 h-4 text-emerald-400" />
-                    End-to-end encrypted submission
+                    Soumission chiffrée de bout en bout
                   </div>
                 </div>
               </form>
@@ -361,8 +353,8 @@ function CryptoEnquiryPage() {
       <section className="relative z-10 py-24 px-6 border-t border-white/5 bg-black/40">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 fill-mode-both">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-sans">The Nexus Advantage</h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">Bridging the gap between retail investors and institutional execution.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-sans">L'Avantage Nexus</h2>
+            <p className="text-zinc-400 max-w-xl mx-auto">Combler le fossé entre les investisseurs particuliers et l'exécution institutionnelle.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -372,24 +364,24 @@ function CryptoEnquiryPage() {
                 color: "text-indigo-400",
                 bg: "bg-indigo-500/10",
                 border: "border-indigo-500/20 hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.15)]",
-                title: "Algorithmic Precision",
-                desc: "Micro-second execution based on real-time on-chain data and volume profile analysis, completely eliminating human emotional error."
+                title: "Précision Algorithmique",
+                desc: "Exécution à la microseconde basée sur des données on-chain en temps réel et l'analyse du profil de volume, éliminant complètement l'erreur émotionnelle humaine."
               },
               {
                 icon: Shield,
                 color: "text-fuchsia-400",
                 bg: "bg-fuchsia-500/10",
                 border: "border-fuchsia-500/20 hover:border-fuchsia-500/50 hover:shadow-[0_0_30px_rgba(217,70,239,0.15)]",
-                title: "Non-Custodial Security",
-                desc: "Your funds never leave your exchange. We connect via restricted API keys that only allow trading, ensuring zero withdrawal risk."
+                title: "Sécurité Non Dépositaire",
+                desc: "Vos fonds ne quittent jamais votre plateforme. Nous nous connectons via des clés API restreintes qui ne permettent que le trading, assurant un risque de retrait nul."
               },
               {
                 icon: Lock,
                 color: "text-rose-400",
                 bg: "bg-rose-500/10",
                 border: "border-rose-500/20 hover:border-rose-500/50 hover:shadow-[0_0_30px_rgba(244,63,94,0.15)]",
-                title: "Strictly Limited Access",
-                desc: "To protect our edge in the market and ensure maximum slippage control, we strictly cap the number of active automated users."
+                title: "Accès Strictement Limité",
+                desc: "Pour protéger notre avantage sur le marché et assurer un contrôle maximal du slippage, nous plafonnons strictement le nombre d'utilisateurs automatisés actifs."
               }
             ].map((feature, i) => (
               <div
@@ -411,11 +403,11 @@ function CryptoEnquiryPage() {
       <section className="relative z-10 py-24 px-6 overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 fill-mode-both">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-sans">Ecosystem Intelligence</h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">Continuous learning loops operating across global markets.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-sans">Intelligence Écosystémique</h2>
+            <p className="text-zinc-400 max-w-xl mx-auto">Boucles d'apprentissage continu opérant sur les marchés mondiaux.</p>
           </div>
 
-          <div className="relative flex justify-center items-center h-[400px]">
+          <div className="relative flex justify-center items-center h-[400px] scale-75 md:scale-100">
             {/* Center Node */}
             <div className="absolute z-20 w-24 h-24 bg-gradient-to-tr from-fuchsia-600 to-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(217,70,239,0.5)] animate-pulse">
               <Zap className="w-10 h-10 text-white" />
@@ -447,10 +439,10 @@ function CryptoEnquiryPage() {
 
       {/* Footer */}
       <footer className="relative z-10 py-10 text-center text-xs text-zinc-600 border-t border-white/10 bg-black">
-        <p className="font-semibold text-zinc-500">© 2026 NexusAI Trading Technologies. All rights reserved.</p>
+        <p className="font-semibold text-zinc-500">© 2026 NexusAI Trading Technologies. Tous droits réservés.</p>
         <p className="mt-3 max-w-2xl mx-auto opacity-70">
-          Trading cryptocurrencies involves significant risk and can result in the loss of your invested capital.
-          You should not invest more than you can afford to lose and should ensure that you fully understand the risks involved.
+          Le trading de cryptomonnaies implique des risques importants et peut entraîner la perte de votre capital investi.
+          Vous ne devriez pas investir plus que ce que vous pouvez vous permettre de perdre et devriez vous assurer de bien comprendre les risques impliqués.
         </p>
       </footer>
     </div>

@@ -15,23 +15,25 @@ import card1 from "@/assets/card1.jpg";
 import card2 from "@/assets/card2.jpg";
 import card3 from "@/assets/card3.jpg";
 import card4 from "@/assets/card4.jpg";
+import logo from "@/assets/logo.png";
+import podcast from "@/assets/podcast.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "How a Swiss Influencer Turned $5K Into $12M In Crypto — The Meridian" },
-      { name: "description", content: "An inside look at how a former Alpine skier rebuilt his life and rewrote the crypto influencer playbook." },
-      { property: "og:title", content: "How a Swiss Influencer Turned $5K Into $12M In Crypto — The Meridian" },
-      { property: "og:description", content: "Inside the wallet that rewrote the crypto influencer playbook." },
+      { title: "Comment un influenceur suisse a transformé 5K$ en 12M$ en Crypto - Le Temps Moderne" },
+      { name: "description", content: "Un regard de l'intérieur sur la façon dont un ancien skieur alpin a reconstruit sa vie et réécrit le manuel de l'influenceur crypto." },
+      { property: "og:title", content: "Comment un influenceur suisse a transformé 5K$ en 12M$ en Crypto - Le Temps Moderne" },
+      { property: "og:description", content: "À l'intérieur du portefeuille qui a réécrit le manuel de l'influenceur crypto." },
     ],
   }),
   component: Index,
 });
 
 const NAV = [
-  "World", "Politics", "Business", "Finance", "Crypto", "Technology", "Markets",
-  "Opinion", "Research", "Interviews", "Podcasts", "Editorial", "Magazine",
-  "Startups", "AI", "Culture", "About", "Archive", "Contact",
+  "Monde", "Politique", "Affaires", "Finance", "Crypto", "Technologie", "Marchés",
+  "Opinion", "Recherche", "Interviews", "Podcasts", "Éditorial", "Magazine",
+  "Startups", "IA", "Culture", "À propos", "Archives", "Contact",
 ];
 
 const TOPICS = [
@@ -40,18 +42,18 @@ const TOPICS = [
 ];
 
 const TRENDING = [
-  "How AI is revolutionizing crypto trading strategies",
-  "Inside the private groups where millionaires are made",
-  "Why institutional money is flooding into Web3",
-  "A wallet-by-wallet look at Europe's new crypto whales",
-  "The on-chain footprint of the top 10 traders, decoded",
+  "Comment l'IA révolutionne les stratégies de trading crypto",
+  "À l'intérieur des groupes privés où se créent les millionnaires",
+  "Pourquoi l'argent institutionnel afflue dans le Web3",
+  "Un examen détaillé des nouvelles baleines crypto en Europe",
+  "L'empreinte on-chain des 10 meilleurs traders, décodée",
 ];
 
 const RELATED = [
-  { img: card1, cat: "On-Chain", title: "The 14 wallets that moved $1.2B in 48 hours", desc: "An on-chain reconstruction of who knew what, and when.", author: "Kenji Mori", time: "7 min", date: "Jun 14, 2026" },
-  { img: card2, cat: "Trading", title: "How a $400 trade became a $9M exit", desc: "The complete trade journal of an anonymous sniper.", author: "Hannah Voss", time: "12 min", date: "Jun 11, 2026" },
-  { img: card3, cat: "Research", title: "Spotting influencer wallets before they post", desc: "Six on-chain heuristics that consistently surface accumulation.", author: "Dr. Owen Hartley", time: "18 min", date: "Jun 09, 2026" },
-  { img: card4, cat: "Bitcoin", title: "The quiet return of corporate treasuries to BTC", desc: "Strategy is no longer the only public company stacking coins.", author: "Priya Ramanathan", time: "10 min", date: "Jun 07, 2026" },
+  { img: card1, cat: "On-Chain", title: "Les 14 portefeuilles qui ont déplacé 1.2M$ en 48 heures", desc: "Une reconstruction on-chain de qui savait quoi, et quand.", author: "Kenji Mori", time: "7 min", date: "14 Juin 2026" },
+  { img: card2, cat: "Trading", title: "Comment un trade de 400$ est devenu une sortie de 9M$", desc: "Le journal de trading complet d'un sniper anonyme.", author: "Hannah Voss", time: "12 min", date: "11 Juin 2026" },
+  { img: card3, cat: "Recherche", title: "Repérer les portefeuilles d'influenceurs avant qu'ils ne publient", desc: "Six heuristiques on-chain qui révèlent systématiquement l'accumulation.", author: "Dr. Owen Hartley", time: "18 min", date: "09 Juin 2026" },
+  { img: card4, cat: "Bitcoin", title: "Le retour discret des trésoreries d'entreprises vers BTC", desc: "Strategy n'est plus la seule entreprise publique à accumuler des jetons.", author: "Priya Ramanathan", time: "10 min", date: "07 Juin 2026" },
 ];
 
 function EnquiryLink({ children, className, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
@@ -62,20 +64,36 @@ function EnquiryLink({ children, className, ...props }: React.AnchorHTMLAttribut
   );
 }
 
-function Index() {
+function ProgressBar() {
   const [progress, setProgress] = useState(0);
-  const [dark, setDark] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
     const onScroll = () => {
-      const h = document.documentElement;
-      const max = h.scrollHeight - h.clientHeight;
-      setProgress(max > 0 ? (h.scrollTop / max) * 100 : 0);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const h = document.documentElement;
+          const max = h.scrollHeight - h.clientHeight;
+          setProgress(max > 0 ? (h.scrollTop / max) * 100 : 0);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  return (
+    <div className="h-[2px] w-full bg-rule/40">
+      <div className="h-full bg-primary transition-[width] duration-75" style={{ width: `${progress}%` }} />
+    </div>
+  );
+}
+
+function Index() {
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -87,9 +105,9 @@ function Index() {
       <div className="border-b border-rule/60 bg-background/60 backdrop-blur">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           <div className="hidden items-center gap-4 md:flex">
-            <span>Saturday, 20 June 2026</span>
+            <span>Samedi, 20 Juin 2026</span>
             <span className="text-rule">·</span>
-            <span>London Edition</span>
+            <span>Édition Européenne</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline">BTC $71,408 <span className="text-[color:var(--color-primary)]">+1.18%</span></span>
@@ -108,10 +126,10 @@ function Index() {
             </EnquiryLink>
             <EnquiryLink className="block text-center">
               <div className="font-serif text-xl font-black tracking-tight md:text-2xl">
-                The <span className="italic text-primary">Meridian</span>
+                Le Temps <span className="italic text-primary">Moderne</span>
               </div>
               <div className="mt-0.5 text-[9px] uppercase tracking-[0.4em] text-muted-foreground">
-                Est. MMXXVI · No. 1,284
+                Fondé en MMXXVI · N° 1,284
               </div>
             </EnquiryLink>
             <div className="flex items-center gap-1.5 md:gap-2">
@@ -120,18 +138,18 @@ function Index() {
               <button onClick={() => setDark(d => !d)} aria-label="Theme" className="rounded-full p-2 hover:bg-muted">
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
-              <EnquiryLink className="hidden text-[11px] uppercase tracking-[0.18em] text-foreground/80 hover:text-primary md:inline">Login</EnquiryLink>
-              <EnquiryLink className="inline-flex items-center gap-1 border border-foreground/80 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition hover:bg-foreground hover:text-paper">
-                Crypto Hub
+              <EnquiryLink className="hidden text-[11px] uppercase tracking-[0.18em] text-foreground/80 hover:text-primary md:inline">Connexion</EnquiryLink>
+              <EnquiryLink className="hidden sm:inline-flex items-center gap-1 border border-foreground/80 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition hover:bg-foreground hover:text-paper">
+                Hub Crypto
               </EnquiryLink>
               <EnquiryLink className="inline-flex items-center gap-1 bg-foreground px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-paper transition hover:bg-primary md:px-4">
-                Join Now <ArrowUpRight className="h-3 w-3" />
+                Rejoindre <ArrowUpRight className="h-3 w-3" />
               </EnquiryLink>
             </div>
           </div>
 
           <nav className="hide-scrollbar -mx-6 overflow-x-auto border-t border-rule/60 px-6">
-            <ul className="flex min-w-max items-center gap-5 py-2.5 text-[11px] uppercase tracking-[0.18em] text-foreground/75">
+            <ul className="flex min-w-max items-center justify-center gap-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/75">
               {NAV.map((n) => (
                 <li key={n} className="shrink-0">
                   <EnquiryLink className={`story-link story-link-hover ${n === "Crypto" ? "text-primary" : ""}`}>
@@ -142,132 +160,119 @@ function Index() {
             </ul>
           </nav>
         </div>
-        <div className="h-[2px] w-full bg-rule/40">
-          <div className="h-full bg-primary transition-[width] duration-150" style={{ width: `${progress}%` }} />
-        </div>
+        <ProgressBar />
       </header>
 
-      {/* HERO */}
-      <section className="border-b border-rule/60">
-        <div className="mx-auto max-w-[1400px] px-6 pt-10 pb-14 md:pt-16 md:pb-20">
-          <div className="grid gap-10 md:grid-cols-12 md:gap-12">
-            <div className="md:col-span-7">
-              <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.25em]">
-                <EnquiryLink className="bg-primary px-2.5 py-1 text-primary-foreground">Crypto · Feature</EnquiryLink>
-                <span className="text-muted-foreground">The Long Read</span>
-                <span className="border border-accent px-2 py-1 text-[color:var(--color-accent)]">Premium</span>
-              </div>
+      {/* ARTICLE HEADER & HERO */}
+      <section className="bg-background">
+        <div className="mx-auto max-w-[1200px] px-6 pt-12 pb-8 md:pt-16 md:pb-10">
+          <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.25em] mb-6">
+            <EnquiryLink className="bg-primary px-2.5 py-1 text-primary-foreground font-bold">Crypto · Dossier</EnquiryLink>
+            <span className="text-muted-foreground font-medium">Long Format</span>
+            <span className="border border-accent px-2 py-1 text-[color:var(--color-accent)] font-medium">Premium</span>
+          </div>
 
-              <h1 className="mt-5 font-serif text-[2rem] font-black leading-[1.05] tracking-tight md:text-[3.25rem] md:leading-[1.02]">
-                From the Alps to the Blockchain: How <span className="italic text-primary">Fabian Müller</span> Turned a Ski Accident into a $12M Portfolio
-              </h1>
+          <h1 className="max-w-4xl font-serif text-[2.5rem] font-black leading-[1.1] tracking-tight md:text-[4.5rem]">
+            Des Alpes à la Blockchain: Comment <span className="italic text-primary">Fabian Müller</span> a transformé un accident de ski en 12M$
+          </h1>
 
-              <p className="mt-5 max-w-2xl font-serif text-base italic text-muted-foreground md:text-lg">
-                For nineteen months, the former Swiss Alpine skier quietly built a fortune from his hospital bed. Now, he's finally revealing the automated system that made it possible.
-              </p>
+          <p className="mt-6 max-w-3xl font-serif text-lg italic text-muted-foreground md:text-2xl leading-relaxed">
+            Pendant dix-neuf mois, l'ancien skieur alpin a discrètement bâti une fortune depuis son lit d'hôpital. Aujourd'hui, il révèle le système automatisé qui a rendu cela possible.
+          </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-4 border-y border-rule/60 py-4">
-                <img src={author} alt="Eleanor Whitcombe" width={44} height={44} className="h-11 w-11 rounded-full object-cover ring-1 ring-rule" loading="lazy" />
-                <div className="min-w-0">
-                  <div className="text-xs font-medium">By <span className="text-primary">Eleanor Whitcombe</span></div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Crypto & Markets Correspondent</div>
-                </div>
-                <EnquiryLink className="ml-1 border px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] transition border-rule hover:border-primary hover:text-primary">
-                  Follow
-                </EnquiryLink>
-                <div className="ml-auto flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  <span>20 June 2026</span>
-                  <span className="text-rule">·</span>
-                  <span className="inline-flex items-center gap-1.5"><Clock className="h-3 w-3" /> 18 min read</span>
-                  <span className="text-rule">·</span>
-                  <span className="inline-flex items-center gap-1.5"><Eye className="h-3 w-3" /> 412k</span>
-                </div>
-              </div>
-
-              {/* Action bar */}
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <EnquiryLink className="btn-ghost"><ThumbsUp className="h-3.5 w-3.5" /> Like · 12.3k</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Bookmark className="h-3.5 w-3.5" /> Save</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><MessageCircle className="h-3.5 w-3.5" /> 1,284</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Headphones className="h-3.5 w-3.5" /> Listen</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Copy className="h-3.5 w-3.5" /> Copy link</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Printer className="h-3.5 w-3.5" /> Print</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Download className="h-3.5 w-3.5" /> Read offline</EnquiryLink>
-                <EnquiryLink className="btn-ghost"><Flag className="h-3.5 w-3.5" /> Report</EnquiryLink>
-                <span className="ml-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Share</span>
-                {[Twitter, Facebook, Linkedin, Link2, Mail].map((Icon, i) => (
-                  <EnquiryLink key={i} aria-label="share" className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-primary">
-                    <Icon className="h-3.5 w-3.5" />
-                  </EnquiryLink>
-                ))}
+          <div className="mt-10 flex flex-wrap items-center gap-6 border-y border-rule/60 py-5">
+            <div className="flex items-center gap-3">
+              <img src={author} alt="Eleanor Whitcombe" width={48} height={48} className="h-12 w-12 rounded-full object-cover ring-1 ring-rule" loading="lazy" />
+              <div className="text-left">
+                <div className="text-sm font-semibold">Par <span className="text-primary hover:underline cursor-pointer">Eleanor Whitcombe</span></div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">Correspondante Crypto & Marchés</div>
               </div>
             </div>
-
-            <figure className="md:col-span-5">
-              <EnquiryLink className="group relative overflow-hidden block">
-                <img src={hero} alt="A glowing Bitcoin beside a vintage trading screen" width={1600} height={1067} className="aspect-[4/5] w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]" />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/15 to-transparent" />
-              </EnquiryLink>
-              <figcaption className="mt-3 border-l-2 border-primary pl-3 text-[11px] italic text-muted-foreground">
-                Müller's automated trading system generated unprecedented returns while he was recovering. Photograph illustration: Marius Klein for The Meridian.
-              </figcaption>
-            </figure>
+            
+            <div className="hidden h-8 w-px bg-rule/60 md:block" />
+            
+            <div className="flex flex-wrap items-center gap-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <span>20 Juin 2026</span>
+              <span className="text-rule">·</span>
+              <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> 18 min de lecture</span>
+            </div>
+            
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mr-2 hidden sm:inline">Partager</span>
+              {[Twitter, Facebook, Linkedin, Mail].map((Icon, i) => (
+                <EnquiryLink key={i} aria-label="share" className="rounded-full border border-rule p-2 text-muted-foreground transition hover:border-primary hover:bg-muted hover:text-primary">
+                  <Icon className="h-3.5 w-3.5" />
+                </EnquiryLink>
+              ))}
+            </div>
           </div>
+        </div>
+
+        <div className="mx-auto max-w-[1200px] px-6 mb-12">
+          <figure className="group relative overflow-hidden rounded-sm">
+            <EnquiryLink className="block">
+              <img src={hero} alt="A glowing Bitcoin beside a vintage trading screen" width={1600} height={800} className="w-full object-cover max-h-[600px] transition-transform duration-[1200ms] ease-out group-hover:scale-[1.02]" />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </EnquiryLink>
+            <figcaption className="mt-3 border-l-2 border-primary pl-3 text-[11px] italic text-muted-foreground">
+              Le système de trading automatisé de Müller a généré des rendements sans précédent pendant sa convalescence. Illustration photographique: Marius Klein pour Le Temps Moderne.
+            </figcaption>
+          </figure>
         </div>
       </section>
 
       {/* BODY + SIDEBAR */}
-      <section className="mx-auto max-w-[1400px] px-6 py-14 md:py-20">
-        <div className="grid gap-14 md:grid-cols-12 md:gap-16">
+      <section className="mx-auto max-w-[1200px] px-6 py-8 md:py-12">
+        <div className="grid gap-12 md:grid-cols-12 md:gap-16">
           <article className="md:col-span-8">
-            <div className="mx-auto max-w-[680px]">
-              <p className="drop-cap font-serif text-[1.05rem] leading-[1.7] text-foreground/90 md:text-[1.15rem]">
-                The accident happened on a crisp Tuesday morning in St. Moritz. Fabian Müller, a rising star in Swiss Alpine skiing, took a catastrophic fall that shattered both his legs and his Olympic dreams. Bedridden for months, the 24-year-old athlete faced an uncertain future. But what started as a tragedy soon evolved into one of the most remarkable financial comeback stories of the decade.
+            <div className="max-w-[680px]">
+              <p className="drop-cap font-serif text-[1.1rem] leading-[1.8] text-foreground/90 md:text-[1.2rem]">
+                L'accident s'est produit par un frais matin de mardi à St. Moritz. Fabian Müller, étoile montante du ski alpin suisse, a fait une chute catastrophique qui lui a brisé les deux jambes et ses rêves olympiques. Cloué au lit pendant des mois, l'athlète de 24 ans faisait face à un avenir incertain. Mais ce qui a commencé comme une tragédie s'est rapidement transformé en l'une des histoires de retour financier les plus remarquables de la décennie.
               </p>
 
-              <p className="mt-5 text-[0.95rem] leading-[1.85] text-foreground/85">
-                Today, Müller is known to millions not for his prowess on the slopes, but for his uncanny ability to read the digital asset markets. With a portfolio that grew from a modest $5,000 savings account to over $12 million in just under two years, he has rewritten the playbook on wealth generation. The secret? An automated, AI-driven trading strategy that he perfected while recovering in the hospital.
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                Aujourd'hui, Müller est connu de millions de personnes non pas pour ses prouesses sur les pistes, mais pour son incroyable capacité à lire les marchés des actifs numériques. Avec un portefeuille qui est passé d'un modeste compte d'épargne de 5 000 $ à plus de 12 millions de dollars en un peu moins de deux ans, il a réécrit les règles de la création de richesse. Le secret ? Une stratégie de trading automatisée et pilotée par l'IA qu'il a perfectionnée alors qu'il se remettait à l'hôpital.
               </p>
 
               <h2 className="mt-12 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
-                I.  The trade nobody saw
+                I. Le trade que personne n'a vu
               </h2>
               <div className="mt-3 mb-6 h-px w-12 bg-primary" />
 
-              <p className="text-[0.95rem] leading-[1.85] text-foreground/85">
-                What makes Müller's position remarkable is not the size — there are larger wallets — but the discipline. Across nineteen months, including the brutal market drawdowns, his automated systems executed trades with mathematical precision, stripping away the emotional panic that ruins most retail investors. "It's the most calculated, emotionless trading I've ever seen," says Ayla Chen, lead analyst at Arkham.
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                Ce qui rend la position de Müller remarquable n'est pas sa taille - il existe des portefeuilles plus importants - mais la discipline. Au cours de dix-neuf mois, y compris lors des pires baisses du marché, ses systèmes automatisés ont exécuté des transactions avec une précision mathématique, éliminant la panique émotionnelle qui ruine la plupart des investisseurs particuliers. "C'est le trading le plus calculé et le moins émotionnel que j'aie jamais vu", déclare Ayla Chen, analyste principale chez Arkham.
               </p>
 
               <blockquote className="my-10 border-l-2 border-primary pl-5 md:my-14 md:-ml-10 md:pl-9">
                 <Quote className="h-5 w-5 text-primary/60" />
                 <p className="mt-3 font-serif text-[1.4rem] italic leading-[1.35] text-foreground md:text-[1.7rem]">
-                  &ldquo;I treated the crypto markets like a downhill course. You don't react to the bumps, you anticipate them and let the physics do the work.&rdquo;
+                  &ldquo;J'ai traité les marchés crypto comme une piste de descente. Vous ne réagissez pas aux bosses, vous les anticipez et laissez la physique faire le travail.&rdquo;
                 </p>
                 <footer className="mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  — Fabian Müller
+                  - Fabian Müller
                 </footer>
               </blockquote>
 
-              <figure className="my-10 -mx-4 md:-mx-16">
+              <figure className="my-12">
                 <EnquiryLink className="block">
-                  <img src={inline2} alt="Crypto trading screen" width={1200} height={800} loading="lazy" className="w-full transition hover:opacity-90" />
+                  <img src={inline2} alt="Crypto trading screen" width={1200} height={800} loading="lazy" className="w-full rounded-sm transition hover:opacity-90" />
                 </EnquiryLink>
-                <figcaption className="mt-3 px-4 text-[11px] italic text-muted-foreground md:px-16">
-                  A glimpse into the dashboard of the automated system that changed Müller's life.
+                <figcaption className="mt-4 px-2 text-[11.5px] italic text-muted-foreground border-l-2 border-primary pl-3">
+                  Un aperçu du tableau de bord du système automatisé qui a changé la vie de Müller.
                 </figcaption>
               </figure>
 
-              <h2 className="mt-12 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
-                II.  Anatomy of a 240,000% return
+              <h2 className="mt-14 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
+                II. L'anatomie d'un retour de 240 000 %
               </h2>
               <div className="mt-3 mb-6 h-px w-12 bg-primary" />
 
               <div className="my-8 grid grid-cols-2 gap-5 border-y border-rule py-8 md:grid-cols-4">
                 {[
-                  { k: "$5,000", v: "Initial investment (Mar 2024)" },
-                  { k: "142 BTC", v: "Total accumulated by May 2026" },
-                  { k: "$12.4M", v: "Mark-to-market, 20 Jun 2026" },
-                  { k: "+240,000%", v: "Realised + unrealised return" },
+                  { k: "5 000 $", v: "Investissement initial (Mars 2024)" },
+                  { k: "142 BTC", v: "Total accumulé en Mai 2026" },
+                  { k: "12.4M $", v: "Valeur de marché, 20 Juin 2026" },
+                  { k: "+240 000%", v: "Rendement réalisé + non réalisé" },
                 ].map((s) => (
                   <div key={s.k}>
                     <div className="font-serif text-2xl font-bold text-primary md:text-3xl">{s.k}</div>
@@ -277,23 +282,23 @@ function Index() {
               </div>
 
               <aside className="my-10 border border-rule bg-secondary/60 p-5 md:p-7">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-primary">Exclusive Access</div>
-                <h3 className="mt-2 font-serif text-lg font-bold md:text-xl">How you can access the exact same system</h3>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-primary">Accès Exclusif</div>
+                <h3 className="mt-2 font-serif text-lg font-bold md:text-xl">Comment vous pouvez accéder à ce même système</h3>
                 <p className="mt-2 text-[0.92rem] leading-[1.75] text-foreground/85">
-                  For the first time, Fabian is allowing a select group of individuals to use the exact same automated trading system he developed. Spots are strictly limited to ensure market stability.
+                  Pour la première fois, Fabian permet à un groupe restreint de personnes d'utiliser exactement le même système de trading qu'il a développé. Les places sont strictement limitées pour assurer la stabilité du marché.
                 </p>
                 <EnquiryLink className="mt-4 inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-[10px] uppercase tracking-[0.2em] text-primary-foreground transition hover:bg-foreground">
-                  Apply for Access <ArrowUpRight className="h-3.5 w-3.5" />
+                  Demander un Accès <ArrowUpRight className="h-3.5 w-3.5" />
                 </EnquiryLink>
               </aside>
 
-              <p className="text-[0.95rem] leading-[1.85] text-foreground/85">
-                Skeptics point out that such returns are impossible to guarantee. But that misses the point. The strategy was not about gambling on memecoins. It was about leveraging AI to detect micro-fluctuations in institutional buying patterns. "The smartest creators understood the lesson of 2022 better than most VCs. Don't promote it. Let the algorithms do the heavy lifting," Müller explained in a recent interview.
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                Les sceptiques soulignent que de tels rendements sont impossibles à garantir. Mais cela passe à côté de l'essentiel. La stratégie ne consistait pas à parier sur des memecoins. Il s'agissait d'utiliser l'IA pour détecter les micro-fluctuations dans les modèles d'achat institutionnels. "Les créateurs les plus intelligents ont mieux compris la leçon de 2022 que la plupart des capital-risqueurs. Ne faites pas de promotion. Laissez les algorithmes faire le gros du travail", a expliqué Müller lors d'une récente interview.
               </p>
 
               <figure className="my-10">
                 <figcaption className="mb-3 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  Figure 1 · The Müller Portfolio Balance vs. BTC price, Mar 2024 – Jun 2026
+                  Figure 1 · Le Solde du Portefeuille Müller contre le prix du BTC, Mars 2024 - Juin 2026
                 </figcaption>
                 <div className="border border-rule bg-card p-5">
                   <div className="flex h-44 items-end gap-1.5">
@@ -304,25 +309,45 @@ function Index() {
                     ))}
                   </div>
                   <div className="mt-3 flex justify-between text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                    <span>Mar '24</span><span>Sep '24</span><span>Mar '25</span><span>Jun '26</span>
+                    <span>Mar '24</span><span>Sep '24</span><span>Mar '25</span><span>Juin '26</span>
                   </div>
                 </div>
               </figure>
 
-              <h2 className="mt-12 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
-                III.  What it means for the next cycle
+              <h2 className="mt-14 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
+                III. Une Nouvelle Vie Révélée en Direct
               </h2>
               <div className="mt-3 mb-6 h-px w-12 bg-primary" />
 
-              <p className="text-[0.95rem] leading-[1.85] text-foreground/85">
-                If the previous bull market was defined by celebrities being paid to shill, the next one is defined by silent algorithmic accumulation. The retail trader now has the opportunity to level the playing field, provided they have access to the right tools. The information asymmetry has not vanished, but it is being democratised by pioneers like Müller.
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                Le véritable tournant de l'histoire de Müller n'a pas été le moment où son portefeuille a franchi la barre des huit chiffres, mais lorsqu'il a finalement décidé de partager son parcours. Lors d'une récente apparition dans le podcast <span className="italic">"Uncharted Wealth"</span>, il s'est assis avec l'animateur vedette Marcus Thorne pour détailler exactement comment l'automatisation de la cryptomonnaie a non seulement sauvé ses finances, mais aussi sa santé mentale après son accident débilitant.
+              </p>
+
+              <figure className="my-12">
+                <img src={podcast} alt="Fabian Müller during a podcast interview" width={1200} height={800} loading="lazy" className="w-full rounded-sm transition hover:opacity-90" />
+                <figcaption className="mt-4 px-2 text-[11.5px] italic text-muted-foreground border-l-2 border-primary pl-3">
+                  Müller lors de son apparition décisive dans le podcast "Uncharted Wealth", expliquant comment l'approche algorithmique l'a libéré de l'anxiété du marché.
+                </figcaption>
+              </figure>
+
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                "Quand vous êtes coincé dans un lit d'hôpital pendant six mois, votre esprit peut devenir très sombre", a admis Müller, la voix chargée d'émotion, alors qu'il parlait dans le microphone. "Le système de trading que j'ai construit n'était pas seulement une question d'argent. C'était un moyen de reprendre le contrôle de ma vie alors que mon corps m'avait fait défaut. L'IA n'a pas de mauvaises journées. Elle ne ressent pas la douleur de la rééducation physique. Elle se contente d'exécuter." Cette interview a profondément résonné auprès d'une nouvelle génération d'investisseurs fatigués du stress constant lié à la surveillance des graphiques 24h/24 et 7j/7.
+              </p>
+
+              <h2 className="mt-14 font-serif text-2xl font-bold leading-tight md:text-[1.8rem]">
+                IV. Ce que cela signifie pour le prochain cycle
+              </h2>
+              <div className="mt-3 mb-6 h-px w-12 bg-primary" />
+
+              <p className="mt-6 text-[1rem] leading-[1.85] text-foreground/85">
+                Si le précédent marché haussier était défini par des célébrités payées pour faire de la promotion, le prochain est défini par une accumulation algorithmique silencieuse. Le trader particulier a désormais l'opportunité de rééquilibrer les règles du jeu, à condition d'avoir accès aux bons outils. L'asymétrie de l'information n'a pas disparu, mais elle est en train d'être démocratisée par des pionniers comme Müller.
               </p>
 
               <div className="my-10 border border-rule p-5 md:p-7 bg-foreground text-background text-center">
-                <h3 className="font-serif text-2xl font-bold mb-4">Ready to rewrite your own destiny?</h3>
-                <p className="text-[0.95rem] mb-6 opacity-90">Join the exclusive waiting list to gain access to the algorithmic trading system that powered Fabian's incredible success.</p>
+                <h3 className="font-serif text-2xl font-bold mb-4">Prêt à réécrire votre propre destin ?</h3>
+                <p className="text-[0.95rem] mb-6 opacity-90">Rejoignez la liste d'attente exclusive pour accéder au système de trading algorithmique qui a propulsé l'incroyable succès de Fabian.</p>
                 <EnquiryLink className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 text-[12px] font-bold uppercase tracking-[0.2em] transition hover:scale-105 duration-200">
-                  Register Your Interest Now <ArrowUpRight className="h-4 w-4" />
+                  Enregistrez votre intérêt maintenant <ArrowUpRight className="h-4 w-4" />
                 </EnquiryLink>
               </div>
 
@@ -336,25 +361,25 @@ function Index() {
               {/* Bottom action bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-y border-rule py-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <EnquiryLink className="btn-ghost"><ThumbsUp className="h-3.5 w-3.5" /> Helpful</EnquiryLink>
-                  <EnquiryLink className="btn-ghost"><Zap className="h-3.5 w-3.5" /> Start Trading</EnquiryLink>
-                  <EnquiryLink className="btn-ghost"><Bell className="h-3.5 w-3.5" /> Follow updates</EnquiryLink>
-                  <EnquiryLink className="btn-ghost"><Wallet className="h-3.5 w-3.5" /> Open Platform</EnquiryLink>
+                  <EnquiryLink className="btn-ghost"><ThumbsUp className="h-3.5 w-3.5" /> Utile</EnquiryLink>
+                  <EnquiryLink className="btn-ghost"><Zap className="h-3.5 w-3.5" /> Commencer le Trading</EnquiryLink>
+                  <EnquiryLink className="btn-ghost"><Bell className="h-3.5 w-3.5" /> Suivre les mises à jour</EnquiryLink>
+                  <EnquiryLink className="btn-ghost"><Wallet className="h-3.5 w-3.5" /> Plateforme Ouverte</EnquiryLink>
                 </div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Updated 2 hours ago</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Mis à jour il y a 2 heures</div>
               </div>
 
               {/* Author bio */}
               <section className="mt-10 flex gap-4 border-t border-rule pt-7">
                 <img src={author} alt="Eleanor Whitcombe" width={72} height={72} loading="lazy" className="h-18 w-18 shrink-0 rounded-full object-cover ring-1 ring-rule" />
                 <div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Written by</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Rédigé par</div>
                   <div className="mt-1 font-serif text-lg font-bold">Eleanor Whitcombe</div>
                   <p className="mt-1.5 text-[0.85rem] leading-relaxed text-muted-foreground">
-                    Crypto & Markets Correspondent at The Meridian. Previously digital assets editor at the Financial Times.
+                    Correspondante Crypto & Marchés pour Le Temps Moderne. Anciennement éditrice des actifs numériques au Financial Times.
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <EnquiryLink className="btn-ghost"><ArrowUpRight className="h-3.5 w-3.5" /> View all articles</EnquiryLink>
+                    <EnquiryLink className="btn-ghost"><ArrowUpRight className="h-3.5 w-3.5" /> Voir tous les articles</EnquiryLink>
                   </div>
                 </div>
               </section>
@@ -362,14 +387,14 @@ function Index() {
           </article>
 
           {/* Sidebar */}
-          <aside className="md:col-span-4">
-            <div className="sticky top-32 space-y-10">
-              <SidebarBlock title="Editor's Picks">
+          <aside className="md:col-span-4 border-t border-rule/30 pt-10 md:border-t-0 md:border-l md:pl-8 md:pt-0">
+            <div className="sticky top-28 space-y-12">
+              <SidebarBlock title="Choix de la Rédaction">
                 <ol className="space-y-4">
                   {[
-                    "The 14 wallets that moved $1.2B before the ETF approval",
-                    "Solana's new whales: a wallet-level census",
-                    "Why Coinbase quietly delisted three memecoins last week",
+                    "Les 14 portefeuilles qui ont déplacé 1.2M$ avant l'approbation de l'ETF",
+                    "Les nouvelles baleines de Solana : un recensement par portefeuille",
+                    "Pourquoi Coinbase a discrètement retiré trois memecoins la semaine dernière",
                   ].map((t, i) => (
                     <li key={t} className="group flex gap-3 border-b border-rule/60 pb-4 last:border-0">
                       <span className="font-serif text-xl font-bold text-primary/80">0{i + 1}</span>
@@ -379,7 +404,7 @@ function Index() {
                 </ol>
               </SidebarBlock>
 
-              <SidebarBlock title="Most Read Today" icon={<TrendingUp className="h-3 w-3" />}>
+              <SidebarBlock title="Les Plus Lus Aujourd'hui" icon={<TrendingUp className="h-3 w-3" />}>
                 <ol className="space-y-3">
                   {TRENDING.map((t, i) => (
                     <li key={t} className="flex gap-3 text-[0.85rem] leading-snug">
@@ -390,7 +415,7 @@ function Index() {
                 </ol>
               </SidebarBlock>
 
-              <SidebarBlock title="Live Crypto Prices">
+              <SidebarBlock title="Prix Crypto en Direct">
                 <ul className="divide-y divide-rule/60 text-[0.85rem]">
                   {[
                     ["Bitcoin", "$71,408", "+1.18%", true],
@@ -409,34 +434,34 @@ function Index() {
                   ))}
                 </ul>
                 <EnquiryLink className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-primary hover:underline">
-                  Start Trading Now <ChevronRight className="h-3 w-3" />
+                  Commencez à Trader <ChevronRight className="h-3 w-3" />
                 </EnquiryLink>
               </SidebarBlock>
 
               <div className="border border-rule bg-foreground p-5 text-background">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-accent">Exclusive Opportunity</div>
-                <h3 className="mt-2 font-serif text-xl leading-tight">Join the Elite Inner Circle.</h3>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-accent">Opportunité Exclusive</div>
+                <h3 className="mt-2 font-serif text-xl leading-tight">Rejoignez le Cercle Privé.</h3>
                 <p className="mt-2 text-[0.85rem] leading-relaxed text-background/70">
-                  Gain priority access to the very same trading algorithms that created a $12M fortune.
+                  Obtenez un accès prioritaire aux algorithmes de trading qui ont créé une fortune de 12M$.
                 </p>
                 <div className="mt-4">
                   <EnquiryLink className="block text-center w-full bg-accent px-3 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-accent-foreground transition hover:bg-background hover:text-foreground">
-                    Claim Your Spot
+                    Réservez Votre Place
                   </EnquiryLink>
                 </div>
               </div>
 
-              <SidebarBlock title="Featured Podcast">
+              <SidebarBlock title="Podcast en Vedette">
                 <EnquiryLink className="group flex gap-3">
                   <div className="relative h-18 w-18 shrink-0 overflow-hidden bg-gradient-to-br from-primary to-[color:var(--color-navy)]" style={{ width: 72, height: 72 }}>
                     <PlayCircle className="absolute inset-0 m-auto h-7 w-7 text-paper transition group-hover:scale-110" />
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-primary">Episode 142</div>
+                    <div className="text-[10px] uppercase tracking-[0.22em] text-primary">Épisode 142</div>
                     <div className="mt-1 font-serif text-[0.95rem] leading-snug story-link story-link-hover">
-                      Interview with Fabian Müller: The Missing Years
+                      Entretien avec Fabian Müller : Les années manquantes
                     </div>
-                    <div className="mt-1 text-[11px] text-muted-foreground">42 min · this week</div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">42 min · cette semaine</div>
                   </div>
                 </EnquiryLink>
               </SidebarBlock>
@@ -449,10 +474,10 @@ function Index() {
       <section className="mx-auto max-w-[1400px] px-6 py-16 border-t border-rule">
         <div className="mb-8 flex items-end justify-between border-b border-rule pb-4">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.3em] text-primary">Continue Reading</div>
-            <h2 className="mt-2 font-serif text-2xl font-bold md:text-3xl">More Success Stories</h2>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-primary">Continuer la Lecture</div>
+            <h2 className="mt-2 font-serif text-2xl font-bold md:text-3xl">Plus de Succès Stories</h2>
           </div>
-          <EnquiryLink className="hidden text-[10px] uppercase tracking-[0.22em] text-foreground/70 hover:text-primary md:inline">All features <ChevronRight className="-mt-0.5 inline h-3 w-3" /></EnquiryLink>
+          <EnquiryLink className="hidden text-[10px] uppercase tracking-[0.22em] text-foreground/70 hover:text-primary md:inline">Voir tout <ChevronRight className="-mt-0.5 inline h-3 w-3" /></EnquiryLink>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -477,9 +502,11 @@ function Index() {
         <div className="mx-auto max-w-[1400px] px-6 pt-12 pb-8">
           <div className="grid gap-8 md:grid-cols-12">
             <div className="md:col-span-4">
-              <div className="font-serif text-2xl font-black">The <span className="italic text-primary">Meridian</span></div>
+              <div className="font-serif text-2xl font-black mb-4">
+                Le Temps <span className="italic text-primary">Moderne</span>
+              </div>
               <p className="mt-3 max-w-sm text-[0.85rem] leading-relaxed text-muted-foreground">
-                Premium digital journalism for readers who want the long view. Independent since MMXXVI.
+                Journalisme numérique de qualité pour les lecteurs qui voient loin. Indépendant depuis MMXXVI.
               </p>
               <div className="mt-5 flex gap-2.5">
                 {[Twitter, Facebook, Linkedin, Rss].map((Icon, i) => (
@@ -490,9 +517,9 @@ function Index() {
               </div>
             </div>
             {[
-              { title: "Newsroom", items: ["About", "Editorial Team", "Newsroom", "Contact", "Careers", "Press"] },
-              { title: "Sections", items: ["World", "Business", "Finance", "Markets", "Crypto", "Technology", "Culture"] },
-              { title: "Legal", items: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Risk Disclaimer"] },
+              { title: "Rédaction", items: ["À propos", "Équipe Éditoriale", "Salle de Presse", "Contact", "Carrières", "Presse"] },
+              { title: "Sections", items: ["Monde", "Affaires", "Finance", "Marchés", "Crypto", "Technologie", "Culture"] },
+              { title: "Légal", items: ["Confidentialité", "Conditions", "Cookies", "Avis de Risque"] },
             ].map(col => (
               <div key={col.title} className="md:col-span-2">
                 <div className="text-[10px] uppercase tracking-[0.25em] text-primary">{col.title}</div>
@@ -506,26 +533,26 @@ function Index() {
               </div>
             ))}
             <div className="md:col-span-2">
-              <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Start Today</div>
-              <p className="mt-3 text-[0.85rem] text-muted-foreground">Ready to change your life?</p>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Commencez Aujourd'hui</div>
+              <p className="mt-3 text-[0.85rem] text-muted-foreground">Prêt à changer de vie ?</p>
               <div className="mt-3">
                 <EnquiryLink className="block text-center w-full bg-primary px-3 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary-foreground transition hover:bg-foreground">
-                  Get Started
+                  Démarrer
                 </EnquiryLink>
               </div>
             </div>
           </div>
 
           <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-rule pt-5 text-[11px] text-muted-foreground md:flex-row">
-            <div>© MMXXVI The Meridian Publishing Co. · All rights reserved.</div>
+            <div>© MMXXVI Le Temps Moderne Publishing Co. · Tous droits réservés.</div>
             <div className="flex gap-4">
-              <EnquiryLink className="hover:text-primary">Privacy</EnquiryLink>
-              <EnquiryLink className="hover:text-primary">Terms</EnquiryLink>
+              <EnquiryLink className="hover:text-primary">Confidentialité</EnquiryLink>
+              <EnquiryLink className="hover:text-primary">Conditions</EnquiryLink>
             </div>
           </div>
 
           <div className="mt-6 text-[10px] text-muted-foreground text-center border-t border-rule pt-4 opacity-70">
-            DISCLAIMER: This is an advertorial and not actual news. The story presented is a dramatization for marketing purposes. Cryptocurrency trading involves high risk and may not be suitable for all investors.
+            AVERTISSEMENT : Ceci est un publireportage et non une véritable actualité. L'histoire présentée est une dramatisation à des fins de marketing. Le trading de cryptomonnaies implique des risques élevés et peut ne pas convenir à tous les investisseurs.
           </div>
         </div>
       </footer>
@@ -541,7 +568,7 @@ function SidebarBlock({ title, icon, children }: { title: string; icon?: React.R
           {icon}{title}
         </h3>
         <EnquiryLink className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-primary">
-          View All
+          Voir Tout
         </EnquiryLink>
       </div>
       {children}
