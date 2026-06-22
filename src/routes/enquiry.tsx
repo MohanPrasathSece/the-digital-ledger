@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Send, Check, Shield, Activity, Lock, Zap, ArrowUpRight, ArrowDownRight, BarChart3, Terminal, Cpu } from "lucide-react";
-
 export const Route = createFileRoute("/enquiry")({
   component: CryptoEnquiryPage,
 });
@@ -16,6 +15,52 @@ const enquirySchema = z.object({
 type EnquiryValues = z.infer<typeof enquirySchema>;
 type EnquiryErrors = Partial<Record<keyof EnquiryValues, string>>;
 
+const submitCrmEnquiry = createServerFn({ method: "POST" })
+  .validator((data: EnquiryValues) => data)
+  .handler(async ({ data }) => {
+    const CRM_API_URL = process.env.CRM_API_URL;
+    const CRM_AUTH_TOKEN = process.env.CRM_AUTH_TOKEN;
+
+    if (!CRM_API_URL || !CRM_AUTH_TOKEN) {
+      throw new Error("Server misconfiguration: Missing CRM credentials");
+    }
+
+    // Attempting to split name into first and last name if possible
+    const nameParts = data.name.trim().split(" ");
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
+    const payload = {
+      country_name: "cy", // Default or extract if needed
+      description: data.message || "",
+      phone: data.phone,
+      email: data.email,
+      first_name: firstName,
+      last_name: lastName,
+      custom_fields: {
+        Source_ID: "Website",
+        Outline_Your_Case: data.message || "Enquiry"
+      }
+    };
+
+    const response = await fetch(CRM_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${CRM_AUTH_TOKEN}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("CRM submission failed:", response.status, text);
+      throw new Error("Failed to submit enquiry to CRM");
+    }
+
+    return { success: true };
+  });
+
 // --- Fake Trading Data Generator ---
 type Trade = { id: number; time: string; pair: string; type: "BUY" | "SELL"; price: string; amount: string };
 const PAIRS = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "LINK/USDT", "AVAX/USDT"];
@@ -27,7 +72,7 @@ function generateFakeTrade(id: number): Trade {
   const price = (priceBase + (Math.random() * priceBase * 0.01) * (Math.random() > 0.5 ? 1 : -1)).toFixed(2);
   const amount = (Math.random() * 5 + 0.1).toFixed(4);
   const now = new Date();
-  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${Math.floor(Math.random()*999).toString().padStart(3, '0')}`;
+  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
   return { id, time, pair, type: isBuy ? "BUY" : "SELL", price: `$${price}`, amount };
 }
 
@@ -35,8 +80,10 @@ function CryptoEnquiryPage() {
   const [values, setValues] = useState<EnquiryValues>({ name: "", email: "", phone: "", message: "" });
   const [errors, setErrors] = useState<EnquiryErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  
+
   // Trading window state
   const [trades, setTrades] = useState<Trade[]>([]);
   const tradeIdRef = useRef(6);
@@ -50,7 +97,7 @@ function CryptoEnquiryPage() {
   // Trading animation effect
   useEffect(() => {
     // Initialize with some trades
-    const initialTrades = Array.from({length: 6}, (_, i) => generateFakeTrade(i));
+    const initialTrades = Array.from({ length: 6 }, (_, i) => generateFakeTrade(i));
     setTrades(initialTrades);
 
     const interval = setInterval(() => {
@@ -81,21 +128,29 @@ function CryptoEnquiryPage() {
       setErrors(fieldErrors);
       return;
     }
-    
-    // Simulate network request
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setSubmitted(true);
-    setValues({ name: "", email: "", phone: "", message: "" });
+
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      await submitCrmEnquiry({ data: values });
+      setSubmitted(true);
+      setValues({ name: "", email: "", phone: "", message: "" });
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="dark min-h-screen bg-[#09090b] text-zinc-300 font-sans selection:bg-fuchsia-500/30 overflow-x-hidden relative">
-      
+
       {/* Background Animated Elements */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {/* Grid Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
+
         {/* Glowing Orbs */}
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600 opacity-20 blur-[120px] animate-pulse duration-[8000ms]"></div>
         <div className="absolute top-[30%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-600 opacity-15 blur-[100px] animate-pulse duration-[10000ms] delay-1000"></div>
@@ -215,7 +270,7 @@ function CryptoEnquiryPage() {
           <div className="bg-[#1e1b4b] border-2 border-indigo-500/50 rounded-3xl p-8 md:p-12 shadow-[0_0_80px_rgba(99,102,241,0.25)] relative overflow-hidden group">
             {/* Intense glowing top accent */}
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-rose-400"></div>
-            
+
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-white mb-3">Request Private Access</h2>
               <p className="text-indigo-200 text-sm">Leave your details to secure your place in the next onboarding cohort. Spaces are strictly limited.</p>
@@ -231,6 +286,11 @@ function CryptoEnquiryPage() {
               </div>
             ) : (
               <form onSubmit={onSubmit} noValidate className="space-y-6 text-left">
+                {submitError && (
+                  <div className="bg-rose-500/10 border border-rose-500/50 rounded-xl p-4 text-rose-400 text-sm font-bold text-center">
+                    {submitError}
+                  </div>
+                )}
                 <div className="grid md:grid-cols-2 gap-6">
                   <Field label="Full Name" error={errors.name}>
                     <input
@@ -272,13 +332,18 @@ function CryptoEnquiryPage() {
                 </Field>
 
                 <div className="pt-4">
-                  <button 
-                    type="submit" 
-                    className="w-full relative group overflow-hidden rounded-xl px-8 py-5 bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-none shadow-[0_0_30px_rgba(217,70,239,0.3)] hover:shadow-[0_0_50px_rgba(217,70,239,0.6)] transition-all duration-300 transform hover:-translate-y-1"
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full relative group overflow-hidden rounded-xl px-8 py-5 bg-gradient-to-r from-fuchsia-600 to-indigo-600 border-none shadow-[0_0_30px_rgba(217,70,239,0.3)] transition-all duration-300 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-[0_0_50px_rgba(217,70,239,0.6)] transform hover:-translate-y-1'}`}
                   >
                     <div className="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                     <span className="relative flex items-center justify-center gap-2 font-bold text-[15px] tracking-widest text-white uppercase">
-                      Submit Secure Application <Send className="w-5 h-5 ml-1" />
+                      {isSubmitting ? (
+                        <>Processing <Activity className="w-5 h-5 ml-1 animate-pulse" /></>
+                      ) : (
+                        <>Submit Secure Application <Send className="w-5 h-5 ml-1" /></>
+                      )}
                     </span>
                   </button>
                   <div className="mt-5 flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider text-indigo-300/70">
@@ -327,8 +392,8 @@ function CryptoEnquiryPage() {
                 desc: "To protect our edge in the market and ensure maximum slippage control, we strictly cap the number of active automated users."
               }
             ].map((feature, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={`group p-8 rounded-3xl bg-black/60 border transition-all duration-500 ${feature.border}`}
               >
                 <div className={`w-14 h-14 rounded-2xl ${feature.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
@@ -342,11 +407,49 @@ function CryptoEnquiryPage() {
         </div>
       </section>
 
+      {/* SECTION 6: Animated Workflow / Ecosystem */}
+      <section className="relative z-10 py-24 px-6 overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 fill-mode-both">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 font-sans">Ecosystem Intelligence</h2>
+            <p className="text-zinc-400 max-w-xl mx-auto">Continuous learning loops operating across global markets.</p>
+          </div>
+
+          <div className="relative flex justify-center items-center h-[400px]">
+            {/* Center Node */}
+            <div className="absolute z-20 w-24 h-24 bg-gradient-to-tr from-fuchsia-600 to-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(217,70,239,0.5)] animate-pulse">
+              <Zap className="w-10 h-10 text-white" />
+            </div>
+
+            {/* Orbit 1 */}
+            <div className="absolute z-10 w-[200px] h-[200px] border border-white/10 rounded-full animate-[spin_10s_linear_infinite]">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.8)]">
+                <Activity className="w-3 h-3 text-white" />
+              </div>
+            </div>
+
+            {/* Orbit 2 */}
+            <div className="absolute z-10 w-[300px] h-[300px] border border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]">
+              <div className="absolute top-1/2 -right-3 -translate-y-1/2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(244,63,94,0.8)]">
+                <Terminal className="w-3 h-3 text-white" />
+              </div>
+            </div>
+
+            {/* Orbit 3 */}
+            <div className="absolute z-10 w-[450px] h-[450px] border border-white/5 rounded-full animate-[spin_20s_linear_infinite]">
+              <div className="absolute bottom-4 left-1/4 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.8)]">
+                <Cpu className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="relative z-10 py-10 text-center text-xs text-zinc-600 border-t border-white/10 bg-black">
         <p className="font-semibold text-zinc-500">© 2026 NexusAI Trading Technologies. All rights reserved.</p>
         <p className="mt-3 max-w-2xl mx-auto opacity-70">
-          Trading cryptocurrencies involves significant risk and can result in the loss of your invested capital. 
+          Trading cryptocurrencies involves significant risk and can result in the loss of your invested capital.
           You should not invest more than you can afford to lose and should ensure that you fully understand the risks involved.
         </p>
       </footer>

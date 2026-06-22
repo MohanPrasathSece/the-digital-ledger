@@ -29,14 +29,14 @@ export const Route = createFileRoute("/")({
 });
 
 const NAV = [
-  "World","Politics","Business","Finance","Crypto","Technology","Markets",
-  "Opinion","Research","Interviews","Podcasts","Editorial","Magazine",
-  "Startups","AI","Culture","About","Archive","Contact",
+  "World", "Politics", "Business", "Finance", "Crypto", "Technology", "Markets",
+  "Opinion", "Research", "Interviews", "Podcasts", "Editorial", "Magazine",
+  "Startups", "AI", "Culture", "About", "Archive", "Contact",
 ];
 
 const TOPICS = [
-  "Bitcoin","Ethereum","Solana","Trading Bots","Influencers","DeFi",
-  "Wallets","On-Chain","ETFs","Regulation","Web3","NFTs","Mining","Stablecoins",
+  "Bitcoin", "Ethereum", "Solana", "Trading Bots", "Influencers", "DeFi",
+  "Wallets", "On-Chain", "ETFs", "Regulation", "Web3", "NFTs", "Mining", "Stablecoins",
 ];
 
 const TRENDING = [
@@ -297,7 +297,7 @@ function Index() {
                 </figcaption>
                 <div className="border border-rule bg-card p-5">
                   <div className="flex h-44 items-end gap-1.5">
-                    {[1,2,5,12,18,25,32,45,58,72,85,92,96,98,100].map((v, i) => (
+                    {[1, 2, 5, 12, 18, 25, 32, 45, 58, 72, 85, 92, 96, 98, 100].map((v, i) => (
                       <div key={i} className="group relative flex-1">
                         <div className="w-full bg-primary/80 transition-all duration-300 group-hover:bg-primary" style={{ height: `${v}%` }} />
                       </div>
@@ -372,7 +372,7 @@ function Index() {
                     "Why Coinbase quietly delisted three memecoins last week",
                   ].map((t, i) => (
                     <li key={t} className="group flex gap-3 border-b border-rule/60 pb-4 last:border-0">
-                      <span className="font-serif text-xl font-bold text-primary/80">0{i+1}</span>
+                      <span className="font-serif text-xl font-bold text-primary/80">0{i + 1}</span>
                       <EnquiryLink className="font-serif text-[0.95rem] leading-snug story-link story-link-hover">{t}</EnquiryLink>
                     </li>
                   ))}
@@ -383,7 +383,7 @@ function Index() {
                 <ol className="space-y-3">
                   {TRENDING.map((t, i) => (
                     <li key={t} className="flex gap-3 text-[0.85rem] leading-snug">
-                      <span className="font-mono text-[10px] text-muted-foreground">{String(i+1).padStart(2,"0")}</span>
+                      <span className="font-mono text-[10px] text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
                       <EnquiryLink className="story-link story-link-hover">{t}</EnquiryLink>
                     </li>
                   ))}
@@ -393,12 +393,12 @@ function Index() {
               <SidebarBlock title="Live Crypto Prices">
                 <ul className="divide-y divide-rule/60 text-[0.85rem]">
                   {[
-                    ["Bitcoin","$71,408","+1.18%", true],
-                    ["Ethereum","$3,842","+0.62%", true],
-                    ["Solana","$204.10","+3.41%", true],
-                    ["BNB","$612.30","-0.34%", false],
-                    ["XRP","$0.5821","-0.08%", false],
-                  ].map(([n,p,c,up]) => (
+                    ["Bitcoin", "$71,408", "+1.18%", true],
+                    ["Ethereum", "$3,842", "+0.62%", true],
+                    ["Solana", "$204.10", "+3.41%", true],
+                    ["BNB", "$612.30", "-0.34%", false],
+                    ["XRP", "$0.5821", "-0.08%", false],
+                  ].map(([n, p, c, up]) => (
                     <li key={n as string} className="flex items-center justify-between py-2">
                       <span className="text-foreground/85">{n as string}</span>
                       <span className="flex items-center gap-3 font-mono text-[11px]">
@@ -490,9 +490,9 @@ function Index() {
               </div>
             </div>
             {[
-              { title: "Newsroom", items: ["About","Editorial Team","Newsroom","Contact","Careers","Press"] },
-              { title: "Sections", items: ["World","Business","Finance","Markets","Crypto","Technology","Culture"] },
-              { title: "Legal", items: ["Privacy Policy","Terms of Service","Cookie Policy","Risk Disclaimer"] },
+              { title: "Newsroom", items: ["About", "Editorial Team", "Newsroom", "Contact", "Careers", "Press"] },
+              { title: "Sections", items: ["World", "Business", "Finance", "Markets", "Crypto", "Technology", "Culture"] },
+              { title: "Legal", items: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Risk Disclaimer"] },
             ].map(col => (
               <div key={col.title} className="md:col-span-2">
                 <div className="text-[10px] uppercase tracking-[0.25em] text-primary">{col.title}</div>
@@ -523,7 +523,7 @@ function Index() {
               <EnquiryLink className="hover:text-primary">Terms</EnquiryLink>
             </div>
           </div>
-          
+
           <div className="mt-6 text-[10px] text-muted-foreground text-center border-t border-rule pt-4 opacity-70">
             DISCLAIMER: This is an advertorial and not actual news. The story presented is a dramatization for marketing purposes. Cryptocurrency trading involves high risk and may not be suitable for all investors.
           </div>
