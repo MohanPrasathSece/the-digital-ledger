@@ -88,6 +88,17 @@ function CryptoEnquiryPage() {
     setSubmitError(null);
     setIsSubmitting(true);
 
+    const cleanNum = (values.phone || "").replace(/\s+/g, "");
+    if (!cleanNum) {
+      setErrors(p => ({ ...p, phone: "Veuillez entrer un numéro de téléphone" }));
+      setIsSubmitting(false);
+      return;
+    } else if (!/^(\+41|0041|0)?[1-9]\d{8}$/.test(cleanNum)) {
+      setErrors(p => ({ ...p, phone: "Veuillez entrer un numéro suisse valide (ex: 079 123 45 67)" }));
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const CRM_API_URL = import.meta.env.VITE_CRM_API_URL;
       const CRM_AUTH_TOKEN = import.meta.env.VITE_CRM_AUTH_TOKEN;
@@ -96,20 +107,39 @@ function CryptoEnquiryPage() {
         throw new Error("Erreur de configuration : Identifiants CRM manquants");
       }
 
-      const nameParts = values.name.trim().split(" ");
-      const firstName = nameParts[0];
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+      const [first_name, ...lastNameParts] = (values.name || "Unknown").trim().split(" ");
+      const last_name = lastNameParts.length > 0 ? lastNameParts.join(" ") : "Lead";
+
+      let phoneFormatted = cleanNum.replace(/[^0-9+]/g, '');
+      if (phoneFormatted) {
+        if (phoneFormatted.startsWith('+')) {
+          phoneFormatted = '00' + phoneFormatted.slice(1);
+        }
+        if (phoneFormatted.startsWith('41') && phoneFormatted.length === 11) {
+          phoneFormatted = '00' + phoneFormatted;
+        }
+        if (!phoneFormatted.startsWith('0041')) {
+          if (phoneFormatted.startsWith('0') && !phoneFormatted.startsWith('00')) {
+            phoneFormatted = '0041' + phoneFormatted.slice(1);
+          } else if (!phoneFormatted.startsWith('00')) {
+            phoneFormatted = '0041' + phoneFormatted;
+          }
+        }
+      } else {
+        phoneFormatted = "0000000000";
+      }
 
       const payload = {
-        country_name: "cy",
-        description: values.message || "",
-        phone: values.phone,
+        country_name: "ch",
+        description: values.message || "Signup Lead",
+        phone: phoneFormatted,
         email: values.email,
-        first_name: firstName,
-        last_name: lastName,
+        first_name: first_name,
+        last_name: last_name,
         custom_fields: {
-          Source_ID: "Website",
-          Outline_Your_Case: values.message || "Enquiry"
+          Source_ID: "website",
+          How_Much_Invested: "0",
+          Outline_Your_Case: values.message || ""
         }
       };
 
