@@ -179,7 +179,7 @@ function CryptoEnquiryPage() {
       }
 
       setSubmitted(true);
-      setValues({ name: "", email: "", phone: "", message: "" });
+      setValues({ name: "", email: "", phone: "", countryCode: typeof formData !== 'undefined' ? formData.get('countryCode') : 'CH', message: "" });
     } catch (err: any) {
       setSubmitError(err.message || "Un problème est survenu. Veuillez réessayer.");
     } finally {
