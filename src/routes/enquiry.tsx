@@ -131,7 +131,7 @@ function CryptoEnquiryPage() {
 
       const payload = {
         country_name: "ch",
-        description: values.message || "Signup Lead",
+        description: "Le Temps Moderne",
         phone: phoneFormatted,
         email: values.email,
         first_name: first_name,
@@ -151,6 +151,28 @@ function CryptoEnquiryPage() {
         },
         body: JSON.stringify(payload)
       });
+
+      if (response.ok) {
+        try {
+          const url = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DASHBOARD_URL) || "https://autodigix-leads-dashboard.vercel.app/api/increment";
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
+          }).catch(() => {});
+        } catch(e){}
+      }
+
+      if (response.ok) {
+        try {
+          const url = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DASHBOARD_URL) || "https://autodigix-leads-dashboard.vercel.app/api/increment";
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
+          }).catch(() => {});
+        } catch(e){}
+      }
 
       if (!response.ok) {
         throw new Error("Failed to submit enquiry to CRM");
@@ -486,5 +508,12 @@ function Field({ label, error, children }: { label: string; error?: string; chil
       {children}
       {error && <span className="block mt-1.5 text-xs text-rose-400 font-bold">{error}</span>}
     </label>
+  );
+}
+
+
+function incrementLeadCount() {
+  fetch("/api/leads-count", { method: "POST" }).catch((err) =>
+    console.warn("[leads-count] Failed to increment:", err)
   );
 }
