@@ -171,7 +171,7 @@ function CryptoEnquiryPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${CRM_AUTH_TOKEN}`
+          "Authorization": CRM_AUTH_TOKEN
         },
         body: JSON.stringify(payload)
       });
