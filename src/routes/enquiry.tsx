@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Send, Check, Shield, Activity, Lock, Zap, ArrowUpRight, ArrowDownRight, BarChart3, Terminal, Cpu } from "lucide-react";
+import { toast } from "sonner";
 export const Route = createFileRoute("/enquiry")({
   component: CryptoEnquiryPage,
 });
@@ -163,6 +164,8 @@ function CryptoEnquiryPage() {
         } catch (e: any) {
       const rawMsg = (e?.message || e?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
+        toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
+        setSubmitted(true);
         return;
       }
 }
@@ -179,6 +182,8 @@ function CryptoEnquiryPage() {
         } catch (e: any) {
       const rawMsg = (e?.message || e?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
+        toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
+        setSubmitted(true);
         return;
       }
 }
@@ -193,9 +198,10 @@ function CryptoEnquiryPage() {
     } catch (err: any) {
       const rawMsg = (err?.message || err?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
+        toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
+        setSubmitted(true);
         return;
       }
-
       setSubmitError(err.message || "Un problème est survenu. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);
