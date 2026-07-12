@@ -341,7 +341,7 @@ function CryptoEnquiryPage() {
               <p className="text-indigo-200 text-sm">Laissez vos coordonnées pour garantir votre place dans la prochaine cohorte d'intégration. Les places sont strictement limitées.</p>
             </div>
 
-            {submitted ? (
+            {submitted && (
               <div className="py-12 text-center animate-in zoom-in duration-500">
                 <div className="mx-auto w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.5)]">
                   <Check className="w-10 h-10 text-white" />
@@ -349,7 +349,9 @@ function CryptoEnquiryPage() {
                 <h3 className="text-2xl font-bold text-white mb-2">Candidature Reçue</h3>
                 <p className="text-indigo-200">Notre équipe de conseillers examine votre profil et vous contactera sous peu.</p>
               </div>
-            ) : (
+            )}
+            
+            <div className={submitted ? "hidden" : "block"}>
               <form onSubmit={onSubmit} noValidate className="space-y-6 text-left">
                 {submitError && (
                   <div className="bg-rose-500/10 border border-rose-500/50 rounded-xl p-4 text-rose-400 text-sm font-bold text-center">
@@ -432,7 +434,7 @@ function CryptoEnquiryPage() {
                   </div>
                 </div>
               </form>
-            )}
+            </div>
           </div>
         </div>
       </section>
