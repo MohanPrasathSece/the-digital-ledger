@@ -160,12 +160,9 @@ function CryptoEnquiryPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
           }).catch(() => {});
-        } catch(e){
+        } catch (e: any) {
       const rawMsg = (e?.message || e?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
-        toast.error("You have already contacted us pls wait");
-        if (typeof setError === 'function') setError("You have already contacted us pls wait");
-        setLoading(false);
         return;
       }
 }
@@ -179,12 +176,9 @@ function CryptoEnquiryPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
           }).catch(() => {});
-        } catch(e){
+        } catch (e: any) {
       const rawMsg = (e?.message || e?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
-        toast.error("You have already contacted us pls wait");
-        if (typeof setError === 'function') setError("You have already contacted us pls wait");
-        setLoading(false);
         return;
       }
 }
@@ -199,9 +193,6 @@ function CryptoEnquiryPage() {
     } catch (err: any) {
       const rawMsg = (err?.message || err?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
-        toast.error("You have already contacted us pls wait");
-        if (typeof setError === 'function') setError("You have already contacted us pls wait");
-        setLoading(false);
         return;
       }
 
