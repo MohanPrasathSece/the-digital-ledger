@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Send, Check, Shield, Activity, Lock, Zap, ArrowUpRight, ArrowDownRight, BarChart3, Terminal, Cpu } from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 export const Route = createFileRoute("/enquiry")({
   component: CryptoEnquiryPage,
 });
@@ -11,6 +13,7 @@ const enquirySchema = z.object({
   name: z.string().trim().min(1, "Nom requis").max(100),
   email: z.string().trim().email("Email valide requis").max(255),
   phone: z.string().trim().min(5, "Numéro valide requis").max(20),
+  countryCode: z.string().trim().default("CH"),
   message: z.string().trim().max(2000).optional(),
 });
 type EnquiryValues = z.infer<typeof enquirySchema>;
@@ -33,8 +36,31 @@ function generateFakeTrade(id: number): Trade {
   return { id, time, pair, type: isBuy ? "BUY" : "SELL", price: `$${price}`, amount };
 }
 
+export const COUNTRY_PHONE_PATTERNS: Record<string, { code: string; pattern: RegExp; example: string }> = {
+  CH: { code: "41", pattern: /^(0)?[1-9]\d{8}$/, example: "079 123 45 67" },
+  FR: { code: "33", pattern: /^(0)?[1-9]\d{8}$/, example: "06 12 34 56 78" },
+  BE: { code: "32", pattern: /^(0)?[1-9]\d{7,8}$/, example: "0470 12 34 56" },
+  CA: { code: "1", pattern: /^[2-9]\d{9}$/, example: "416 123 4567" },
+  US: { code: "1", pattern: /^[2-9]\d{9}$/, example: "212 123 4567" },
+  GB: { code: "44", pattern: /^(0)?[7-9]\d{9}$/, example: "07700 900000" },
+  DE: { code: "49", pattern: /^(0)?[1-9]\d{10,11}$/, example: "0151 12345678" },
+  ES: { code: "34", pattern: /^[679]\d{8}$/, example: "612 345 678" },
+  IT: { code: "39", pattern: /^[3]\d{8,9}$/, example: "312 345 6789" },
+  NL: { code: "31", pattern: /^(0)?[6]\d{8}$/, example: "06 12345678" },
+  SE: { code: "46", pattern: /^(0)?[7]\d{8}$/, example: "070 123 45 67" },
+  AU: { code: "61", pattern: /^(0)?[4]\d{8}$/, example: "0412 345 678" },
+  IN: { code: "91", pattern: /^[6-9]\d{9}$/, example: "98765 43210" },
+  AE: { code: "971", pattern: /^(0)?[5]\d{8}$/, example: "050 123 4567" },
+  SG: { code: "65", pattern: /^[89]\d{7}$/, example: "8123 4567" },
+  ZA: { code: "27", pattern: /^(0)?[6-8]\d{8}$/, example: "082 123 4567" },
+  BR: { code: "55", pattern: /^[1-9]{2}9\d{8}$/, example: "11 91234-5678" },
+  MX: { code: "52", pattern: /^[1-9]\d{9}$/, example: "55 1234 5678" },
+  JP: { code: "81", pattern: /^(0)?[7-9]0\d{8}$/, example: "090 1234 5678" },
+  CY: { code: "357", pattern: /^[9]\d{7}$/, example: "99 123456" }
+};
+
 function CryptoEnquiryPage() {
-  const [values, setValues] = useState<EnquiryValues>({ name: "", email: "", phone: "", message: "" });
+  const [values, setValues] = useState<EnquiryValues>({ name: "", email: "", phone: "", countryCode: "CH", message: "" });
   const [errors, setErrors] = useState<EnquiryErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,12 +116,14 @@ function CryptoEnquiryPage() {
     setIsSubmitting(true);
 
     const cleanNum = (values.phone || "").replace(/\s+/g, "");
+    const patternInfo = COUNTRY_PHONE_PATTERNS[values.countryCode || "CH"] || COUNTRY_PHONE_PATTERNS.CH;
+    
     if (!cleanNum) {
       setErrors(p => ({ ...p, phone: "Veuillez entrer un numéro de téléphone" }));
       setIsSubmitting(false);
       return;
-    } else if (!/^(\+41|0041|0)?[1-9]\d{8}$/.test(cleanNum)) {
-      setErrors(p => ({ ...p, phone: "Veuillez entrer un numéro suisse valide (ex: 079 123 45 67)" }));
+    } else if (!patternInfo.pattern.test(cleanNum)) {
+      setErrors(p => ({ ...p, phone: `Veuillez entrer un numéro valide (ex: ${patternInfo.example})` }));
       setIsSubmitting(false);
       return;
     }
@@ -112,26 +140,21 @@ function CryptoEnquiryPage() {
       const last_name = lastNameParts.length > 0 ? lastNameParts.join(" ") : "Lead";
 
       let phoneFormatted = cleanNum.replace(/[^0-9+]/g, '');
-      if (phoneFormatted) {
-        if (phoneFormatted.startsWith('+')) {
-          phoneFormatted = '00' + phoneFormatted.slice(1);
-        }
-        if (phoneFormatted.startsWith('41') && phoneFormatted.length === 11) {
-          phoneFormatted = '00' + phoneFormatted;
-        }
-        if (!phoneFormatted.startsWith('0041')) {
-          if (phoneFormatted.startsWith('0') && !phoneFormatted.startsWith('00')) {
-            phoneFormatted = '0041' + phoneFormatted.slice(1);
-          } else if (!phoneFormatted.startsWith('00')) {
-            phoneFormatted = '0041' + phoneFormatted;
-          }
-        }
+      const selectedCode = values.countryCode?.toUpperCase() || 'CH';
+      const dialCode = patternInfo.code;
+      
+      if (phoneFormatted.startsWith('+')) phoneFormatted = phoneFormatted.slice(1);
+      if (phoneFormatted.startsWith('00')) phoneFormatted = phoneFormatted.slice(2);
+      else if (phoneFormatted.startsWith('0')) phoneFormatted = phoneFormatted.slice(1);
+      
+      if (phoneFormatted.startsWith(dialCode) && phoneFormatted.length > dialCode.length + 5) {
+        phoneFormatted = '00' + phoneFormatted;
       } else {
-        phoneFormatted = "0000000000";
+        phoneFormatted = '00' + dialCode + phoneFormatted;
       }
 
       const payload = {
-        country_name: "ch",
+        country_name: selectedCode.toLowerCase(),
         description: "Le Temps Moderne",
         phone: phoneFormatted,
         email: values.email,
@@ -159,34 +182,11 @@ function CryptoEnquiryPage() {
           await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
+            body: JSON.stringify({ website: "Le Temps Moderne", type: "contact", name: values.name, email: values.email})
           }).catch(() => {});
         } catch (e: any) {
-      const rawMsg = (e?.message || e?.toString() || "");
-      if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
-        toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
-        setSubmitted(true);
-        return;
-      }
-}
-      }
-
-      if (response.ok) {
-        try {
-          const url = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DASHBOARD_URL) || "https://lead-dashboard-orcin.vercel.app/api/increment";
-          await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ website: "Le Temps Moderne", type: values.message ? "contact" : "signup", name: values.name, email: values.email})
-          }).catch(() => {});
-        } catch (e: any) {
-      const rawMsg = (e?.message || e?.toString() || "");
-      if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
-        toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
-        setSubmitted(true);
-        return;
-      }
-}
+          // Ignore dashboard increment errors
+        }
       }
 
       if (!response.ok) {
@@ -377,13 +377,28 @@ function CryptoEnquiryPage() {
                 </div>
 
                 <Field label="Numéro de Téléphone" error={errors.phone}>
-                  <input
-                    type="tel"
-                    value={values.phone}
-                    onChange={e => update("phone", e.target.value)}
-                    className="w-full bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-4 text-white placeholder:text-indigo-300/50 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 transition-all outline-none"
-                    placeholder="+41 79 123 45 67"
-                  />
+                  <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                    <Select value={values.countryCode} onValueChange={val => update("countryCode", val)}>
+                      <SelectTrigger className="w-[110px] bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-[1.4rem] text-white focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 outline-none">
+                        <SelectValue placeholder="Pays" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#111827] text-white border border-indigo-400/30 max-h-[300px]" position="popper" side="bottom">
+                        {Object.entries(COUNTRY_PHONE_PATTERNS).map(([code, info]) => (
+                          <SelectItem key={code} value={code} className="focus:bg-indigo-900 focus:text-white cursor-pointer">
+                            {code} +{info.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <input
+                      type="tel"
+                      value={values.phone}
+                      onChange={e => update("phone", e.target.value)}
+                      className="w-full bg-[#111827] border border-indigo-400/30 rounded-xl px-4 py-4 text-white placeholder:text-indigo-300/50 focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-400/50 transition-all outline-none"
+                      style={{ flex: 1 }}
+                      placeholder="79 123 45 67"
+                    />
+                  </div>
                 </Field>
 
                 <Field label="Objectifs d'Investissement (Optionnel)" error={errors.message}>
