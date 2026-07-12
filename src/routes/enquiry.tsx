@@ -194,7 +194,7 @@ function CryptoEnquiryPage() {
       }
 
       setSubmitted(true);
-      setValues({ name: "", email: "", phone: "", countryCode: typeof formData !== 'undefined' ? formData.get('countryCode') : 'CH', message: "" });
+      setValues({ name: "", email: "", phone: "", countryCode: "CH", message: "" });
     } catch (err: any) {
       const rawMsg = (err?.message || err?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
