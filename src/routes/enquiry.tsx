@@ -167,6 +167,11 @@ function CryptoEnquiryPage() {
         }
       };
 
+      console.log("=== CRM SUBMISSION START ===");
+      console.log("CRM URL:", CRM_API_URL);
+      console.log("CRM Auth Token (Raw):", CRM_AUTH_TOKEN);
+      console.log("Payload:", JSON.stringify(payload, null, 2));
+
       const response = await fetch(CRM_API_URL, {
         method: "POST",
         headers: {
@@ -176,7 +181,11 @@ function CryptoEnquiryPage() {
         body: JSON.stringify(payload)
       });
 
+      console.log("CRM Response Status:", response.status);
+
       if (response.ok) {
+        const responseText = await response.text().catch(() => "No text content");
+        console.log("CRM Response Body (Success):", responseText);
         try {
           const url = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DASHBOARD_URL) || "https://lead-dashboard-orcin.vercel.app/api/increment";
           await fetch(url, {
@@ -190,12 +199,15 @@ function CryptoEnquiryPage() {
       }
 
       if (!response.ok) {
-        throw new Error("Failed to submit enquiry to CRM");
+        const errorText = await response.text().catch(() => "Unknown error");
+        console.error("CRM Response Body (Error 500/Failed):", errorText);
+        throw new Error(`CRM responded with status ${response.status}: ${errorText}`);
       }
 
       setSubmitted(true);
       setValues({ name: "", email: "", phone: "", countryCode: "CH", message: "" });
     } catch (err: any) {
+      console.error("CRM Submission Caught Error:", err);
       const rawMsg = (err?.message || err?.toString() || "");
       if (rawMsg.toLowerCase().includes("already exist") || rawMsg.toLowerCase().includes("already exists") || rawMsg.toLowerCase().includes("contacted")) {
         toast.success("Vous nous avez déjà contactés. Veuillez patienter.");
@@ -204,6 +216,7 @@ function CryptoEnquiryPage() {
       }
       setSubmitError(err.message || "Un problème est survenu. Veuillez réessayer.");
     } finally {
+      console.log("=== CRM SUBMISSION END ===");
       setIsSubmitting(false);
     }
   };
