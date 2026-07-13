@@ -137,7 +137,7 @@ function CryptoEnquiryPage() {
       }
 
       const [first_name, ...lastNameParts] = (values.name || "Unknown").trim().split(" ");
-      const last_name = lastNameParts.length > 0 ? lastNameParts.join(" ") : "Lead";
+      const last_name = lastNameParts.length > 0 ? lastNameParts.join(" ") : "";
 
       let phoneFormatted = cleanNum.replace(/[^0-9+]/g, '');
       const selectedCode = values.countryCode?.toUpperCase() || 'CH';
