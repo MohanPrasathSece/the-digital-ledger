@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Send, Check, Shield, Activity, Lock, Zap, ArrowUpRight, ArrowDownRight, BarChart3, Terminal, Cpu } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trackMetaEvent } from "@/lib/metaPixel";
 
 export const Route = createFileRoute("/enquiry")({
   component: CryptoEnquiryPage,
@@ -186,6 +187,12 @@ function CryptoEnquiryPage() {
       if (response.ok) {
         const responseText = await response.text().catch(() => "No text content");
         console.log("CRM Response Body (Success):", responseText);
+        trackMetaEvent("Lead", {
+          content_name: "Enquiry Form",
+          email: values.email,
+          phone: phoneFormatted,
+        });
+        trackMetaEvent("Contact");
         try {
           const url = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DASHBOARD_URL) || "https://lead-dashboard-orcin.vercel.app/api/increment";
           await fetch(url, {
